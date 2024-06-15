@@ -69,13 +69,13 @@ export default function Home() {
   const onBtnExport = useCallback(() => {
     var params = getParams();
     if (params.columnSeparator) {
-      alert(
+      window.alert(
         "NOTE: you are downloading a file with non-standard separators - it may not render correctly in Excel."
       );
     }
     gridRef.current?.api?.exportDataAsCsv(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alert]);
+  }, []);
 
   return (
     <div className="bg-white w-screen min-h-screen p-5 py-20 flex flex-col items-center justify-center">
