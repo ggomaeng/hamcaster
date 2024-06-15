@@ -86,7 +86,7 @@ export default function Home() {
       </div>
       <input
         className="border w-[420px] max-w-full px-2 rounded-lg mt-5 py-1"
-        placeholder="cast url - https://warpcasat.com/..."
+        placeholder="cast url - https://warpcast.com/..."
         value={url}
         onChange={(e) => setUrl(e.target.value)}
       />
