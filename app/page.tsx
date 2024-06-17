@@ -28,6 +28,17 @@ export default function Home() {
   const gridRef = useRef<any>();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tn100xChecked, setTn100xChecked] = useState(false);
+  const [hamChecked, setHamChecked] = useState(false);
+
+  const handleTn100xChange = (e) => {
+    setTn100xChecked(e.target.checked);
+  };
+
+  const handleHamChange = (e) => {
+    setHamChecked(e.target.checked);
+  };
+
   const [data, setData] = useState<Awaited<ReturnType<typeof getHamData>>>();
 
   useEffect(() => {
@@ -51,6 +62,8 @@ export default function Home() {
         { field: "fid" },
         { field: "username" },
         { field: "address" },
+        { field: "tn100x", hide: !tn100xChecked },
+        { field: "ham", hide: !hamChecked },
         { field: "liked" },
         { field: "recasted" },
         { field: "replied" },
@@ -59,18 +72,20 @@ export default function Home() {
         fid,
         username: data.usernames[fid],
         address: data.fidToAddress[fid],
+        tn100x: data.fidToHoldings[fid],
+        ham: data.fidToHam[fid],
         liked: !!data.liked[fid],
         recasted: !!data.recasted[fid],
         replied: !!data.replied[fid],
       })),
     };
-  }, [data]);
+  }, [data, hamChecked, tn100xChecked]);
 
   const onBtnExport = useCallback(() => {
     var params = getParams();
     if (params.columnSeparator) {
       window.alert(
-        "NOTE: you are downloading a file with non-standard separators - it may not render correctly in Excel."
+        "NOTE: you are downloading a file with non-standard separators - it may not render correctly in Excel.",
       );
     }
     gridRef.current?.api?.exportDataAsCsv(params);
@@ -81,22 +96,47 @@ export default function Home() {
     <div className="bg-white w-screen min-h-screen p-5 py-20 flex flex-col items-center justify-center">
       <div className="text-3xl">🍖</div>
       <div className="text-3xl font-bold">HAMCASTER</div>
-      <div className="text-base text-gray-500 text-center">
+      <div className="text-base text-gray-500 text-center py-4">
         Retrieve ham-chain data of users who interacted with a given cast
       </div>
       <input
-        className="border w-[420px] max-w-full px-2 rounded-lg mt-5 py-1"
+        className="border w-[420px] max-w-full px-2 rounded-lg py-1"
         placeholder="cast url - https://warpcast.com/..."
         value={url}
         onChange={(e) => setUrl(e.target.value)}
       />
+      <div className="text-base text-gray-500 text-center py-4">
+        Retrieve a users TN100x and/or HAM holdings
+      </div>
+      <div className="flex items-center space-x-4">
+        <label htmlFor="tn100x" className="flex items-center space-x-1">
+          <span>TN100x</span>
+          <input
+            type="checkbox"
+            id="tn100x"
+            className="form-checkbox"
+            checked={tn100xChecked}
+            onChange={handleTn100xChange}
+          />
+        </label>
+        <label htmlFor="ham" className="flex items-center space-x-1">
+          <span>HAM</span>
+          <input
+            type="checkbox"
+            id="ham"
+            className="form-checkbox"
+            checked={hamChecked}
+            onChange={handleHamChange}
+          />
+        </label>
+      </div>
       <div
         className="bg-pink-600 text-white px-5 py-2 rounded-lg mt-5 cursor-pointer"
         onClick={async () => {
           try {
             setLoading(true);
             setData(undefined);
-            const result = await getHamData(url);
+            const result = await getHamData(url, { hamChecked, tn100xChecked });
             setData(result);
           } catch (e) {
             console.error(e);
